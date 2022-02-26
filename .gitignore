@@ -2,6 +2,9 @@
 __pycache__
 env
 .idea
+.env_file
+udacity-castone.postman_collection.json
+migrations/
 
 # OS generated files #
 ######################
@@ -14,4 +17,3 @@ ehthumbs.db
 Thumbs.db
 
 # Dependency directory #
-node_modules

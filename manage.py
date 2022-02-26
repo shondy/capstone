@@ -1,14 +1,10 @@
-from flask_script import Manager
-from flask_migrate import Migrate, MigrateCommand
+# https://stackoverflow.com/questions/29872867/using-flask-migrate-with-flask-script-and-application-factory
+# https://flask-migrate.readthedocs.io/en/latest/
+from capstone import create_app
+from flask_migrate import MigrateCommand, Manager
 
-from app import app
-from models import db
-
-migrate = Migrate(app, db)
-manager = Manager(app)
-
+manager = Manager(create_app)
 manager.add_command('db', MigrateCommand)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     manager.run()
