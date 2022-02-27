@@ -4,6 +4,7 @@ env
 .idea
 .env_file
 udacity-castone.postman_collection.json
+Sphinx-docs/
 
 # OS generated files #
 ######################
