@@ -6,8 +6,8 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SECRET_KEY = os.environ.get('SECRET_KEY', 'default_sekret')
-    #SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
-    uri = os.getenv("DATABASE_URL")  # or other relevant config var
+    # SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    uri = os.getenv("DATABASE_URL")
     if uri and uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_DATABASE_URI = uri
@@ -24,3 +24,4 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
+    SQLALCHEMY_DATABASE_URI += '_test'

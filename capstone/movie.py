@@ -11,9 +11,6 @@ from capstone.auth import requires_auth
 def get_movies():
     movies = Movie.query.all()
     movies_list = [movie.format() for movie in movies]
-    if len(movies_list) == 0:
-        abort(404)
-
     return jsonify({
         "success": True,
         "movies": movies_list

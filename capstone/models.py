@@ -10,7 +10,7 @@ setup_db(app)
 def setup_db(app):
     # https://stackoverflow.com/questions/54600434/how-to-set-flask-env-inside-config-file
     # https://stackoverflow.com/questions/39859234/keyerror-app-settings
-    # when crating environment variable from command line in Windows don't use quotation marks
+    # when creating environment variable from command line in Windows don't use quotation marks
     app.config.from_object(os.environ['APP_SETTINGS'])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
