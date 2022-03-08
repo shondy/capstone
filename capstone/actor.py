@@ -11,6 +11,9 @@ from capstone.auth import requires_auth
 def get_actors():
     actors = Actor.query.all()
     actors_list = [actor.format() for actor in actors]
+    if len(actors_list) == 0:
+        abort(404)
+
     return jsonify({
         "success": True,
         "actors": actors_list

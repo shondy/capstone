@@ -53,6 +53,8 @@ class CapstoneTestCase(unittest.TestCase):
 
     # Unit Tests
 
+    # For actors
+
     def test_get_actors(self):
         """Gets the /actors endpoint and checks valid results"""
         token = self.get_api_token()
@@ -62,15 +64,16 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['actors']), 3)
-'''
+
     def test_404_get_actors_from_empty_table(self):
         """Test rising of 404 error if requested all categories from
         empty Category table
         """
-        num_rows_deleted = db.session.query(Actor).delete()
-        # db.session.commit()
+        db.session.query(Actor).delete()
         db.session.flush()
-        res = self.client().get('/api/categories')
+        token = self.get_api_token()
+        res = self.client().get('/actors',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -79,191 +82,317 @@ class CapstoneTestCase(unittest.TestCase):
 
         db.session.rollback()
 
-    def test_get_all_questions(self):
-        """Get all questions for first page (default value for a page number), check that we
-        received first 10 questions, all categories and total number of questions"""
-        res = self.client().get('/api/questions')
+    def test_get_actors_by_id(self):
+        """Test searching for an actor by id"""
+        token = self.get_api_token()
+        res = self.client().get('/actors/1',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(len(data['categories']), 6)
-        self.assertEqual(data['total_questions'], 19)
-        self.assertEqual(len(data['questions']), 10)
-        self.assertEqual(data['questions'][0]['id'], 5)
+        self.assertEqual(data['actor']['id'], 1)
+        self.assertEqual(data['actor']['name'], 'Yurasik')
+        self.assertEqual(data['actor']['age'], 12)
+        self.assertEqual(data['actor']['gender'], 'male')
 
-    def test_get_questions_paginated(self):
-        """Test the pagination of questions, get questions for page 2"""
-        res = self.client().get('/api/questions?page=2')
+    def test_400_get_questions_containing_long_searchTerm(self):
+        """Test searching for an actor by id who's id s not in the DB,
+         should return 400 error"""
+        token = self.get_api_token()
+        res = self.client().get('/actors/100',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(len(data['categories']), 6)
-        self.assertEqual(data['total_questions'], 19)
-        # since total amount of questions is 19, questions per page = 10 =>
-        # there are 9 questions on page 2
-        self.assertEqual(len(data['questions']), 9)
-        self.assertEqual(data['questions'][0]['id'], 15)
-
-    def test_404_get_questions_beyond_valid_page(self):
-        """ Test rising of 404 error if requested page of questions doesn't exist """
-        res = self.client().get('/api/questions?page=1000')
-        # res = self.client().get('/books?page=1', json={'rating': 1})
-        data = json.loads(res.data)
-
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
-    def test_create_new_question(self):
-        """Test creating of the question which will be add to the end of the questions table,
-        and therefore will appear at the end of the last page of the questions list """
-        questions = Question.query.all()
-        num_questions_before = len(questions)
-        res = self.client().post('/api/questions', json=self.new_question)
+    def test_create_new_actor(self):
+        """Test creating of an actor"""
+        actors = Actor.query.all()
+        num_actors_before = len(actors)
+        token = self.get_api_token()
+        res = self.client().post('/actors',
+                                 json=self.new_actor,
+                                 headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
-        questions = Question.query.all()
-        num_questions_after = len(questions)
-        max_id = db.session.query(func.max(Question.id)).scalar()
-        self.assertEqual(num_questions_after, num_questions_before + 1)
+        actors = Actor.query.all()
+        num_actors_after = len(actors)
+        max_id = db.session.query(func.max(Actor.id)).scalar()
+        self.assertEqual(num_actors_after, num_actors_before + 1)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['added'], max_id)
 
-    def test_400_if_question_parameter_is_not_specified(self):
-        """Test creating of a question which has some unspecified parameters,
+    def test_400_if_actor_name_is_not_specified(self):
+        """Test creating of an actor who name wasn't specified,
          should return 400 error"""
-        self.new_question["answer"] = ""
-        res = self.client().post('/api/questions', json=self.new_question)
+        self.new_actor["name"] = ""
+        token = self.get_api_token()
+        res = self.client().post('/actors',
+                                 json=self.new_question,
+                                 headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bed request')
-        self.new_question["answer"] = "Etna"
+        self.new_question["answer"] = "Arnold Schwarzenegger"
 
-    def test_get_questions_containing_searchTerm(self):
-        """Test searching for a term in questions.question"""
-        res = self.client().post('/api/questions', json={'searchTerm': 'What'})
+    def test_delete_actor(self):
+        """Test deleting of the actor with maximum id"""
+        max_id = db.session.query(func.max(Actor.id)).scalar()
+        token = self.get_api_token()
+        res = self.client().delete('/actor/' + str(max_id),
+                                   headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(data['totalQuestions'])
-        self.assertEqual(len(data['questions']), 8)
-        self.assertEqual(data['questions'][0]['id'], 9)
-
-    def test_400_get_questions_containing_long_searchTerm(self):
-        """Test searching for a term longer than 1000 symbols
-        in questions.question, should return 400 error"""
-        res = self.client().post('/api/questions', json={'searchTerm': 'a' * 1001})
-        data = json.loads(res.data)
-        self.assertEqual(res.status_code, 400)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'bed request')
-
-    def test_delete_question(self):
-        """Test deleting of the question with maximum id"""
-        max_id = db.session.query(func.max(Question.id)).scalar()
-        res = self.client().delete('/api/questions/' + str(max_id))
-        data = json.loads(res.data)
-        book = Question.query.filter(Question.id == max_id).one_or_none()
+        actor = Actor.query.filter(Actor.id == max_id).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['deleted'], max_id)
-        self.assertEqual(book, None)
+        self.assertEqual(actor, None)
 
-    def test_404_if_question_does_not_exist(self):
-        """Test deleting of a question that doesn't exist, should return 404 error"""
-        res = self.client().delete('/questions/3')
+    def test_404_if_deleted_actor_does_not_exist(self):
+        """Test deleting of an actor that doesn't exist, should return 404 error"""
+        token = self.get_api_token()
+        res = self.client().delete('/actors/100',
+                                   headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
-    def test_get_questions_by_category(self):
-        """Test getting questions based on category"""
-        res = self.client().get('/api/categories/2/questions')
+    def test_update_actor(self):
+        """Test searching for an actor by id"""
+        actor = Actor.query.filter(Actor.id == 1).first()
+        age = actor.age + 1
+        patch = {
+            'age': age
+        }
+        token = self.get_api_token()
+        res = self.client().patch('/actors/1',
+                                  json=patch,
+                                  headers={'Authorization': f'Bearer {token}'})
+        actor = Actor.query.filter(Actor.id == 1).first()
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['updated'], 1)
+        self.assertEqual(actor.age, age)
+
+    def test_400_if_updated_actor_does_not_exist(self):
+        """Test updating of an actor that doesn't exist,
+        should return 404 error"""
+        token = self.get_api_token()
+        res = self.client().patch('/actors/100',
+                                  headers={'Authorization': f'Bearer {token}'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_get_actor_movies(self):
+        """Test getting actor's movies"""
+        token = self.get_api_token()
+        res = self.client().get('/actors/1/movies',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
 
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['totalQuestions'], 4)
-        self.assertEqual(data['currentCategory'], 2)
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['totalMovies'], 2)
 
-    def test_404_if_questions_for_category_do_not_exist(self):
+    def test_404_if_movies_actor_does_not_exist(self):
         """Test deleting of a question that doesn't exist, should return 404 error"""
         # Get questions for category 100 (doesn't exist, should 404)
-        res = self.client().get('/api/categories/100/questions')
+        token = self.get_api_token()
+        res = self.client().get('/actors/100/movies',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
-    def test_create_quiz(self):
-        """Test finding a random question for a quiz from the given category which
-        doesn't belong to the list of given questions  """
-        quiz_category = {"type": "History", "id": 4}
-        previous_questions = [5, 9, 16, 17]
-        res = self.client().post('/api/quizzes', \
-                                 json={"previous_questions": previous_questions, \
-                                       "quiz_category": quiz_category})
-
+    def test_add_movie_to_actor(self):
+        """Test adding movie to actor"""
+        token = self.get_api_token()
+        res = self.client().get('/actors/1/movies/1',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
-        # print("data", data)
+
         self.assertEqual(data['success'], True)
-        self.assertTrue(data['question']['id'] in [12, 23])
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['movie_id'], 1)
 
-    def test_quiz_is_over(self):
-        """Test returns only a success status without a question
-        if all questions from a given category belong to
-        the list of previous questions that can't be used for quiz """
-        quiz_category = {"type": "History", "id": 4}
-        previous_questions = [5, 9, 12, 23, 16, 17]
-        res = self.client().post('/api/quizzes', \
-                                 json={"previous_questions": previous_questions, \
-                                       "quiz_category": quiz_category})
+    def test_404_if_actor_of_movie_does_not_actor(self):
+        """Test adding movie to actor who does not exist"""
+        token = self.get_api_token()
+        res = self.client().get('/actors/100/movies/1',
+                                headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
+
         self.assertEqual(data['success'], True)
-        self.assertNotIn('question', data)
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['movie_id'], 1)
 
-    def test_create_quiz_without_previous_questions(self):
-        """Test finding a random question for quiz from the given category without specifying
-        a list of questions that can not be chosen """
-        quiz_category = {"type": "History", "id": 4}
-        res = self.client().post('/api/quizzes', json={"previous_questions": [], \
-                                                       "quiz_category": quiz_category})
+        # For movies
 
+    def test_get_movies(self):
+        """Gets the /movies endpoint and checks valid results"""
+        token = self.get_api_token()
+        res = self.client.get(
+            '/movies', headers={'Authorization': f'Bearer {token}'})
         data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertTrue(data['question']["id"] in [5, 9, 12, 23])
+        self.assertEqual(len(data['actors']), 3)
 
-    def test_create_quiz_without_category(self):
-        """Test finding a random question for a quiz without specific category (id = 0)
-         that doesn't belong to the list of given questions """
-        quiz_category = {"id": 0}
-
-        previous_questions = [5, 9, 16, 17]
-        res = self.client().post('/api/quizzes', \
-                                 json={"previous_questions": previous_questions, \
-                                       "quiz_category": quiz_category})
-
+    '''
+    def test_404_get_actors_from_empty_table(self):
+        """Test rising of 404 error if requested all categories from
+        empty Category table
+        """
+        db.session.query(Actor).delete()
+        db.session.flush()
+        res = self.client().get('/actors')
         data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+        db.session.rollback()
+
+    def test_get_actors_by_id(self):
+        """Test searching for an actor by id"""
+        res = self.client().get('/actors/1')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertIsNotNone(data['question'])
+        self.assertEqual(data['actor']['id'], 1)
+        self.assertEqual(data['actor']['name'], 'Yurasik')
+        self.assertEqual(data['actor']['age'], 12)
+        self.assertEqual(data['actor']['gender'], 'male')
 
-    def test_400_if_category_id_is_not_specified(self):
-        """Test creating of a quiz when category id was not specified """
-        quiz_category = {"type": "History"}
-
-        previous_questions = [5, 9, 16, 17]
-        res = self.client().post('/api/quizzes', \
-                                 json={"previous_questions": previous_questions, \
-                                       "quiz_category": quiz_category})
-
+    def test_400_get_questions_containing_long_searchTerm(self):
+        """Test searching for an actor by id who's id s not in the DB,
+         should return 400 error"""
+        res = self.client().get('/actors/100')
         data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_create_new_actor(self):
+        """Test creating of an actor"""
+        actors = Actor.query.all()
+        num_actors_before = len(actors)
+        res = self.client().post('/actors', json=self.new_actor)
+        data = json.loads(res.data)
+        actors = Actor.query.all()
+        num_actors_after = len(actors)
+        max_id = db.session.query(func.max(Actor.id)).scalar()
+        self.assertEqual(num_actors_after, num_actors_before + 1)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['added'], max_id)
+
+    def test_400_if_actor_name_is_not_specified(self):
+        """Test creating of an actor who name wasn't specified,
+         should return 400 error"""
+        self.new_actor["name"] = ""
+        res = self.client().post('/actors', json=self.new_question)
+        data = json.loads(res.data)
+
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bed request')
-'''
+        self.new_question["answer"] = "Arnold Schwarzenegger"
+
+    def test_delete_actor(self):
+        """Test deleting of the actor with maximum id"""
+        max_id = db.session.query(func.max(Actor.id)).scalar()
+        res = self.client().delete('/actor/' + str(max_id))
+        data = json.loads(res.data)
+        actor = Actor.query.filter(Actor.id == max_id).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], max_id)
+        self.assertEqual(actor, None)
+
+    def test_404_if_deleted_actor_does_not_exist(self):
+        """Test deleting of an actor that doesn't exist, should return 404 error"""
+        res = self.client().delete('/actors/100')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_update_actor(self):
+        """Test searching for an actor by id"""
+        actor = Actor.query.filter(Actor.id == 1).first()
+        age = actor.age + 1
+        patch = {
+            'age': age
+        }
+        res = self.client().patch('/actors/1', json=patch)
+        actor = Actor.query.filter(Actor.id == 1).first()
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['updated'], 1)
+        self.assertEqual(actor.age, age)
+
+    def test_400_if_updated_actor_does_not_exist(self):
+        """Test updating of an actor that doesn't exist,
+        should return 404 error"""
+        res = self.client().patch('/actors/100')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_get_actor_movies(self):
+        """Test getting actor's movies"""
+        res = self.client().get('/actors/1/movies')
+        data = json.loads(res.data)
+
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['totalMovies'], 2)
+
+    def test_404_if_movies_actor_does_not_exist(self):
+        """Test deleting of a question that doesn't exist, should return 404 error"""
+        # Get questions for category 100 (doesn't exist, should 404)
+        res = self.client().get('/actors/100/movies')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_add_movie_to_actor(self):
+        """Test adding movie to actor"""
+        res = self.client().get('/actors/1/movies/1')
+        data = json.loads(res.data)
+
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['movie_id'], 1)
+
+    def test_404_if_actor_of_movie_does_not_actor(self):
+        """Test adding movie to actor who does not exist"""
+        res = self.client().get('/actors/100/movies/1')
+        data = json.loads(res.data)
+
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['actor_id'], 1)
+        self.assertEqual(data['movie_id'], 1)
+    '''
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
