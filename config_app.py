@@ -1,21 +1,19 @@
 import os
-#basedir = os.path.abspath(os.path.dirname(__file__))
 
+# https: // flask.palletsprojects.com / en / 2.0.x / config /
 
 class Config(object):
     DEBUG = False
     TESTING = False
     SECRET_KEY = os.environ.get('SECRET_KEY', 'default_sekret')
-    # SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+
+class ProductionConfig(Config):
+    DEBUG = False
     uri = os.getenv("DATABASE_URL")
     if uri and uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_DATABASE_URI = uri
-    # rest of connection code using the connection string `uri`
-
-
-class ProductionConfig(Config):
-    DEBUG = False
 
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
@@ -24,5 +22,3 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    uri = os.getenv("DATABASE_URL")
-    SQLALCHEMY_DATABASE_URI = uri + '_test'
