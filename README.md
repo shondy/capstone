@@ -322,4 +322,11 @@ createdb movies_actors_test
 psql movies_actors_test < capstone_test.psql
 python test_app.py
 ```
-
+Set environment variable:
+```
+set DATABASE_URL=postgresql://<username>:<password>@localhost:5432/movies_actors_test
+set APP_SETTINGS=config_app.TestingConfig
+set CASTING_ASSISTANT_JWT=<JWT for casting assistant>
+set CASTING_DIRECTOR_JWT=<JWT for casting director> 
+set EXECUTIVE_PRODUCER_JWT=<JWT for executive producer>
+```
