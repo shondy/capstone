@@ -1,73 +1,117 @@
-## Capstone Project
+# Capstone Project
 
 This is the capstone project for the Udacity Full Stack Nanodegree program. 
 The project based on the work of the Casting Agency. 
 The Casting Agency models a company that is responsible for creating movies and managing and assigning actors to those movies.  
-There are three roles of the agency employs: a casting assistant, a casting director and an executive producer. Each role has permissions:
-- Casting Assistant
-  - Can view actors and movies
-- Casting Director
+There are three roles of the agency employs: a casting assistant, a casting director and an executive producer. Each role has different permissions.
+
+## URLs
+
+Capstone app URL deployed on Heroku: https://casting-agency-heroku-app.herokuapp.com/ 
+Heroku GitHub repository: https://git.heroku.com/udacity-capstone-shondy.git 
+
+## Start the capstone app on local machine 
+### Installing Dependencies
+
+### Installing Dependencies for the Backend
+
+1. **Python 3.8** - Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
+
+
+2. **Virtual Enviornment** - We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organaized. Instructions for setting up a virual enviornment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+
+
+3. **PIP Dependencies** - Once you have your virtual environment setup and running, install dependencies by naviging to the `/backend` directory and running:
+```bash
+pip install -r requirements.txt
+```
+This will install all of the required packages we selected within the `requirements.txt` file.
+
+
+4. **Key Dependencies**
+ - [Flask](http://flask.pocoo.org/)  is a lightweight backend microservices framework. Flask is required to handle requests and responses.
+
+ - [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use handle the lightweight sqlite database. You'll primarily work in app.py and can reference models.py. 
+
+ - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server. 
+
+### Database Setup
+From within the `./test_app` directory with Postgres running, restore a database using the capstone_test.psql file provided. From the backend folder in terminal run:
+```bash
+psql movies_actors_test < capstone_test.psql
+```
+
+### Running the server
+
+From the root directory of the capstone project first ensure you are working using your created virtual environment.
+
+Each time you open a new terminal session, run:
+
+```bash
+export FLASK_APP=capstone
+```
+
+To run the server, execute:
+
+```bash
+flask run --reload
+```
+
+The `--reload` flag will detect file changes and restart the server automatically.
+ 
+The endpoints are defined in `/capstone/__init__.py`, DB models and SQLAlchemy 
+setup - in `/capstone/models.py`. 
+
+## Authentication
+
+### Casting Assistant
+A Casting Assistant can only view actors and movies.
+
+#### Permissions:
+```bash
+get:actors         | get:movies
+get:actors-detail  | get:movies-detail
+get:actors-movies  | get:movies-actors
+```
+
+### Casting Director
+A Casting Director has 
   - All permissions a Casting Assistant has and…
   - Add or delete an actor from the database
   - Modify actors or movies
-- Executive Producer
-  - All permissions a Casting Director has and…
-  - Add or delete a movie from the database
 
-## Start the trivia app
-
-### Frontend
-Install dependencies for the frontend:
-```
-npm install
-npm start
-```
-Open `http://localhost:3000` to view the Trivia app in the browser.
-
-The `/frontend` directory contains a complete React frontend to consume the data from 
-the Flask server. 
-
-### Backend
-
-Install dependencies for the backend:
-1. **Virtual Enviornment** 
-2. **PIP Dependencies** - install dependencies by naviging to the /backend directory and running:
-   ```
-   pip install -r requirements.txt
-   ```
-   
-3. **Set up the database**:
-   ```
-   psql trivia < trivia.psql
-   ```
-                         
-4. **Prepare the flask app to run and run it**
-   ```
-   set FLASK_APP=flaskr __init__
-   flask run
-   ```
-
-The `/backend` directory contains a Flask and SQLAlchemy server. 
-The endpoints are defined in `/backend/flaskr/__init__.py`, DB models and SQLAlchemy 
-setup - in `/backend/models.py`. 
-
-#### Testing
-To run the unit tests, run
-```
-createdb -U postgres trivia_test
-psql -U postgres trivia_test < trivia.psql 
-python test_flaskr.py
+#### Permissions:
+```bash
+get:actors         | get:movies
+get:actors-detail  | get:movies-detail
+get:actors-movies  | get:movies-actors
+post:actors-movie  | post:movies-actor
+patch:actors       | patch:movies
+post:actors        |
+delete:actors      | 
 ```
 
-### API documentation
-#### Restrictions 
-The API has next restrictions (imposed by CORS):
-- only resources matching `/api/*` can be reached and it can be done by all origins
-- only GET, POST, DELETE, and OPTIONS HTTP methods are allowed
+### Executive Producer
+The Executive Producer has
+ - All permissions a Casting Director has and…
+ - Add or delete a movie from the database
 
-#### Endpoint conventions and Error codes
+#### Permissions:
+```bash
+get:actors         | get:movies
+get:actors-detail  | get:movies-detail
+get:actors-movies  | get:movies-actors
+post:actors-movie  | post:movies-actor
+patch:actors       | patch:movies
+post:actors        | post:movies
+delete:actors      | delete:movies 
+```
+
+## Endpoint conventions and Error codes
 All responses are returned in JSON format and all contain a 
 "success" key, which will return either True or False.
+
+All requests contain a bearer token in a header, the API checks that the token provided is allowed to perform current operation. 
 
 The API can return next error codes: 400, 404, 405, 422, and 500. 
 The return format has the following structure (example for the 404 code): 
@@ -78,284 +122,205 @@ The return format has the following structure (example for the 404 code):
     "message": "resource not found"
 }
 ```
-#### API Objects
-The API has two types of objects, Categories and Questions.
-1. Categories
-   
-   Category is a category of a question. It can have one of 6 possible values: 
-Science, Art, Geography, History, Entertainment, and Sports
-2. Questions
-   
-   Each Question contains a question itself, a category it belongs to, 
-a difficulty (on a scale of 1 to 6), and an answer.
-
-#### Endpoint Library
-##### GET /api/categories
-Returns a list of category objects and success value
-
-*Sample*: curl http://127.0.0.1:5000/api/categories
+##### GET /actors
+Returns: list of actor objects and success value
 ```
 {
-  "categories": [
-    {
-      "id": 1, 
-      "type": "Science"
-    }, 
-    {
-      "id": 2, 
-      "type": "Art"
-    }, 
-    {
-      "id": 3, 
-      "type": "Geography"
-    }, 
-    {
-      "id": 4, 
-      "type": "History"
-    }, 
-    {
-      "id": 5, 
-      "type": "Entertainment"
-    }, 
-    {
-      "id": 6, 
-      "type": "Sports"
-    }
-  ], 
-  "success": true
+  "actors": [
+        {
+            "age": 12,
+            "gender": "male",
+            "id": 1,
+            "name": "Yu"
+        },
+        {
+            "age": 32,
+            "gender": "male",
+            "id": 3,
+            "name": "Alen"
+        }
+    ],
+    "success": true
 }
 ```
-##### GET /api/questions
-Returns a list of all category objects, a list of question objects, 
-success value, and total number of questions in database.
-Results are paginated in groups of 10. 
-Append URL parameter ?page=<num> to choose page number (default page number is 1)
-
-*Sample*: curl http://127.0.0.1:5000/api/questions?page=2
+##### GET /movies
+Returns: list of movie objects and success value
 ```
 {
-  "categories": [
-    {
-      "id": 1, 
-      "type": "Science"
-    }, 
-    {
-      "id": 2, 
-      "type": "Art"
-    }, 
-    {
-      "id": 3, 
-      "type": "Geography"
-    }, 
-    {
-      "id": 4, 
-      "type": "History"
-    }, 
-    {
-      "id": 5, 
-      "type": "Entertainment"
-    }, 
-    {
-      "id": 6, 
-      "type": "Sports"
-    }
-  ], 
-  "current_category": null, 
-  "questions": [
-    {
-      "answer": "Agra", 
-      "category": 3, 
-      "difficulty": 2, 
-      "id": 15, 
-      "question": "The Taj Mahal is located in which Indian city?"
-    }, 
-    {
-      "answer": "Escher", 
-      "category": 2, 
-      "difficulty": 1, 
-      "id": 16, 
-      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
-    }, 
-    {
-      "answer": "Mona Lisa", 
-      "category": 2, 
-      "difficulty": 3, 
-      "id": 17, 
-      "question": "La Giaconda is better known as what?"
-    }, 
-    {
-      "answer": "One", 
-      "category": 2, 
-      "difficulty": 4, 
-      "id": 18, 
-      "question": "How many paintings did Van Gogh sell in his lifetime?"
-    }, 
-    {
-      "answer": "Jackson Pollock", 
-      "category": 2, 
-      "difficulty": 2, 
-      "id": 19, 
-      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
-    }, 
-    {
-      "answer": "The Liver", 
-      "category": 1, 
-      "difficulty": 4, 
-      "id": 20, 
-      "question": "What is the heaviest organ in the human body?"
-    }, 
-    {
-      "answer": "Alexander Fleming", 
-      "category": 1, 
-      "difficulty": 3, 
-      "id": 21, 
-      "question": "Who discovered penicillin?"
-    }, 
-    {
-      "answer": "Blood", 
-      "category": 1, 
-      "difficulty": 4, 
-      "id": 22, 
-      "question": "Hematology is a branch of medicine involving the study of what?"
-    }, 
-    {
-      "answer": "Scarab", 
-      "category": 4, 
-      "difficulty": 4, 
-      "id": 23, 
-      "question": "Which dung beetle was worshipped by the ancient Egyptians?"
-    }
-  ], 
-  "success": true, 
-  "total_questions": 19
+    "movies": [
+        {
+            "id": 1,
+            "release_date": "Sat, 02 Mar 2019 00:00:00 GMT",
+            "title": "Father Brown"
+        },
+        {
+            "id": 2,
+            "release_date": "Sat, 02 Mar 1977 00:00:00 GMT",
+            "title": "Star Wars"
+        }
+    ],
+    "success": true
 }
 ```
-##### DELETE /api/questions/<question_id>
-Deletes the question of the given id if it exists. Returns the id of 
-the deleted question and a success value.
-
-*Sample*: curl -X DELETE http://127.0.0.1:5000/api/questions/19
+##### GET /actors/\<int:actor_id>
+Returns: actor object with id=actor_id and success value
 ```
 {
-    'deleted': 19,
-    'success': true
+    "actor": {
+        "age": 12,
+        "gender": "male",
+        "id": 2,
+        "name": "Yu"
+    },
+    "success": true
 }
 ```
-
-##### POST /api/questions
-This endpoint performs two functions
-- Creates a new question
-- Searches questions based on a search term
-
-**Creating a new question**
-Creating a new question object using the submitted question, answer, category, and 
-difficulty as application/json type. Returns a success status and id of newly created 
-question if successful
-
-*Sample*: curl http://127.0.0.1:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"question": "What is the highest active volcano in Europe?", "answer": "Etna", "category": 3, "difficulty": 2}'
+##### GET /movies/\<movie_id>
+Returns: list of movie objects with id=movie_id and success value
+```
+{
+    "movie": {
+        "id": 1,
+        "release_date": "Sat, 02 Mar 2019 00:00:00 GMT",
+        "title": "Father Brown"
+    },
+    "success": true
+}
+```
+##### GET /actors/\<actor_id>/movies
+Returns: actor_id, list of movie objects for actor object with id=actor_id, success value and total number of movies
+```
+{
+    "actor_id": 3,
+    "movies": [
+        {
+            "id": 1,
+            "release_date": "Sat, 02 Mar 2019 00:00:00 GMT",
+            "title": "Father Brown"
+        }
+    ],
+    "success": true,
+    "totalMovies": 1
+}
+```
+##### GET /movies/\<movie_id>/actors
+Returns: movie_id, list of actor objects for movie object with id=movie_id, success value and total number of actors
+```
+{
+    "actors": [
+        {
+            "age": 32,
+            "gender": "male",
+            "id": 3,
+            "name": "Alen"
+        }
+    ],
+    "movie_id": 1,
+    "success": true,
+    "totalActors": 1
+}
+```
+##### POST /actors/\<actor_id>/movies/\<movie_id>
+Adds the movie with id=movie_id to the actor with id=actor_id
+Returns: actor_id, movie_id and success value
+```
+{
+    "actor_id": 3,
+    "movie_id": 1,
+    "success": true
+}
+```
+##### POST /movies/\<movie_id>/actors/\<actor_id>
+Adds the actor with id=actor_id to the movie with id=movie_id
+Returns: actor_id, movie_id and success value
+```
+{
+    "actor_id": 3,
+    "movie_id": 1,
+    "success": true
+}
+```
+##### PATCH /actors/\<actor_id>
+Request: actor object attributes and values that need to be updated in JSON format
+ ```
+{
+    "age": 12
+}
+```
+Returns: success value and id of updated actor
 ```
 {
     "success": true,
-    "added": 20
+    "updated": 1
 }
 ```
-**Searching questions based on a search term**
-Request contains search term data as application/json type.
-Search term length can't exceed 1000 symbols.
-Returns a success status, a list of all question objects for whom the search term 
-is a substring of the question, and total number of questions 
-
-*Sample*: curl http://localhost:5000/api/questions -X POST -H "Content-Type: application/json" -d '{"searchTerm": "name"}'
+##### PATCH /movies/\<movie_id>
+Request: movie object attributes that need to be updated in JSON format
 ```
 {
-  "questions": [
-    {
-      "answer": "Muhammad Ali", 
-      "category": "4", 
-      "difficulty": 1, 
-      "id": 9, 
-      "question": "What boxer's original name is Cassius Clay?"
-    },
-    {
-      "answer": "Brazil", 
-      "category": "6", 
-      "difficulty": 3, 
-      "id": 10, 
-      "question": "Which is the only team to play in every soccer World Cup tournament?"
-    }
-  ], 
-  "success": true, 
-  "totalQuestions": 19
+    "title": "Star War 1"
 }
 ```
-##### GET /api/categories/<category_id>/questions
-Requests all the questions based on a particular category (category_id).
-Returns a success status, the list of questions for requested category (without pagination), 
-the number of questions in this category, and category_id.
-
-*Sample*: curl http://127.0.0.1:5000/api/categories/5/questions
+Returns: success value and id of updated movie
 ```
 {
-  "currentCategory": 5,
-  "questions": [
-    {
-      "answer": "Apollo 13",
-      "category": 5,
-      "difficulty": 4,
-      "id": 2,
-      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
-    },
-    {
-      "answer": "Tom Cruise",
-      "category": 5,
-      "difficulty": 4,
-      "id": 4,
-      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
-    },
-    {
-      "answer": "Edward Scissorhands",
-      "category": 5,
-      "difficulty": 3,
-      "id": 6,
-      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
-    }
-  ],
-  "success": true,
-  "totalQuestions": 3
+    "success": true,
+    "updated": 1
 }
 ```
-##### POST /api/quizzes
-Enables the playing of a Trivia game
-Returns a random question for a given category that has not been asked already. 
-If a category isn't specified (quiz_category equal to 0) than a question is randomly chosen among all categories.
-Request contains a quiz category and a list of previously asked questions encoded 
-in application/json format.
-Returns a success status and, if successful, a random question. 
-If there are no more questions to return in that category, the API returns only a
-success status (without a question). That tells the frontend the quiz is over.
-
-*Sample*: get a question from all categories (category 0) with an empty list of previous questions 
-(as it at happens at the beginning of the game):
- 
-curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [], quiz_category: {type: "click", id: 0}}'
+##### POST /actors
+Request: name, age, gender of created new actor object in JSON format. 
+ ```
+{
+    'name': 'Arnold Schwarzenegger',
+    'age': '74',
+    'gender': 'male'
+}
+```
+Returns: success value and id of newly created actor
 ```
 {
-  "question": {
-      "answer": "Apollo 13",
-      "category": 5,
-      "difficulty": 4,
-      "id": 2,
-      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
-  }, 
-  "success": true
+    "success": true,
+    "added": 4
 }
 ```
-*Sample*: get a question from the Entertainment category (category 5) when there are no more questions 
-left in the category: 
-
-curl -X POST http://127.0.0.1:5000/api/quizzes -H "Content-Type: application/json" -d '{previous_questions: [2, 4, 6], quiz_category: {type: "Entertainment", id: "5"}}'
+##### POST /movies
+Request: title and release_date of created new movie object in JSON format
 ```
 {
-  "success": true
+    'title': 'Terminator',
+    'release_date': "1984-07-01"
 }
 ```
+Returns: success value and id of newly created movie
+```
+{
+    "success": true,
+    "added": 4
+}
+```
+##### DELETE /actor/\<actor_id>
+Returns: success value and id of deleted actor
+```
+{
+    'success': true,
+    'deleted': 6
+}
+```
+##### DELETE /movie/\<movie_id>
+Returns: success value and id of deleted movie
+```
+{
+    'success': true,
+    'deleted': 6
+}
+```
+
+## Testing
+To run the unit tests, from within the `./test_app` directory run
+```
+createdb movies_actors_test
+psql movies_actors_test < capstone_test.psql
+python test_app.py
+```
+
