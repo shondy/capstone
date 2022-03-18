@@ -7,8 +7,7 @@ There are three roles of the agency employs: a casting assistant, a casting dire
 
 ## URLs
 
-Capstone app URL deployed on Heroku: https://casting-agency-heroku-app.herokuapp.com/ 
-Heroku GitHub repository: https://git.heroku.com/udacity-capstone-shondy.git 
+Capstone app URL deployed on Heroku: https://casting-agency-heroku-app.herokuapp.com/  
 
 ## Start the capstone app on local machine 
 ### Installing Dependencies
