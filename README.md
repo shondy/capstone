@@ -1,13 +1,14 @@
 # Capstone Project
 
-This is the capstone project for the Udacity Full Stack Nanodegree program. 
+This is the capstone project for the Udacity Full Stack Nanodegree program.  
+I developed this project to make use of the knowledge I acquired in this Nanodegree and hence gain confidence in these skills.  
 The project based on the work of the Casting Agency. 
 The Casting Agency models a company that is responsible for creating movies and managing and assigning actors to those movies.  
 There are three roles of the agency employs: a casting assistant, a casting director and an executive producer. Each role has different permissions.
 
 ## URLs
 
-Capstone app URL deployed on Heroku: https://casting-agency-heroku-app.herokuapp.com/  
+Capstone app URL deployed on Heroku: https://udacity-capstone-shondy.herokuapp.com/  
 
 ## Start the capstone app on local machine 
 ### Installing Dependencies

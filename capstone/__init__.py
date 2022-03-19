@@ -1,5 +1,10 @@
 # https://realpython.com/flask-by-example-part-2-postgres-sqlalchemy-and-alembic/
-from flask import Flask, jsonify, request, abort
+from flask import (
+    Flask,
+    request,
+    abort,
+    jsonify
+)
 from flask_cors import CORS
 from flask_migrate import Migrate
 from capstone.models import setup_db, db, Actor, Movie, actor_movie
@@ -73,7 +78,8 @@ def create_app(test_config=None):
         response.status_code = ex.status_code
         return response
 
-
+    @app.route('/'):
+        return jsonify({'message': 'Welcome to Capstone app'})
     '''
     endpoints for Actors
     '''

@@ -313,6 +313,18 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
+    def test_401_if_deleted_movie_by_CASTING_DIRECTOR(self):
+        """Test deleting of an movie by CASTING_DIRECTOR who is not authorized to that,
+         should return 401 error"""
+        max_id = db.session.query(func.max(Movie.id)).scalar()
+        res = self.client().delete('/movies/' + str(max_id),
+                                   headers={'Authorization': 'Bearer ' + self.CASTING_DIRECTOR})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
     def test_get_movie_actors(self):
         """Test getting movie's actors"""
         res = self.client().get('/movies/1/actors',
