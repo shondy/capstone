@@ -78,7 +78,8 @@ def create_app(test_config=None):
         response.status_code = ex.status_code
         return response
 
-    @app.route('/'):
+    @app.route('/')
+    def greeting():
         return jsonify({'message': 'Welcome to Capstone app'})
     '''
     endpoints for Actors

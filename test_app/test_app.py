@@ -77,6 +77,17 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'bed request')
         self.new_actor["answer"] = "Arnold Schwarzenegger"
 
+    def test_403_if_created_actor_by_CASTING_ASSISTANT(self):
+        """Test creating of an actor by CASTING_ASSISTANT who is not authorized to that,
+         should return 403 error"""
+        res = self.client().post('/actors',
+                                 headers={'Authorization': 'Bearer ' + self.CASTING_ASSISTANT},
+                                 json=self.new_actor)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
+
 
     def test_get_actors(self):
         """Gets the /actors endpoint and checks valid results"""
@@ -137,6 +148,20 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
+    def test_403_if_updated_actor_by_CASTING_ASSISTANT(self):
+        """Test updating of an actor by CASTING_ASSISTANT who is not authorized to that,
+         should return 403 error"""
+        patch = {
+            'name': 'Boo'
+        }
+        res = self.client().patch(f'/actors/1',
+                                  headers={'Authorization': 'Bearer ' + self.CASTING_ASSISTANT},
+                                  json=patch)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
+
     def test_delete_actor(self):
         """Test deleting of the actor with maximum id"""
         max_id = db.session.query(func.max(Actor.id)).scalar()
@@ -159,6 +184,17 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_403_if_deleted_actor_by_CASTING_ASSISTANT(self):
+        """Test deleting of an actor by CASTING_DIRECTOR who is not authorized to that,
+         should return 403 error"""
+        max_id = db.session.query(func.max(Actor.id)).scalar()
+        res = self.client().delete('/actors/' + str(max_id),
+                                   headers={'Authorization': 'Bearer ' + self.CASTING_ASSISTANT})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
 
 
     def test_get_actor_movies(self):
@@ -201,6 +237,17 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
+    def test_403_if_added_movie_actor_by_CASTING_ASSISTANT(self):
+        """Test adding movie to actor by CASTING_DIRECTOR who is not authorized to that,
+         should return 403 error"""
+        res = self.client().post('/actors/1/movies/1',
+                                 headers={'Authorization': 'Bearer ' + self.CASTING_ASSISTANT})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
+
         # For movies
 
     def test_create_new_movie(self):
@@ -232,6 +279,17 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bed request')
         self.new_movie["answer"] = "Arnold Schwarzenegger"
+
+    def test_403_if_created_movie_by_CASTING_DIRECTOR(self):
+        """Test creating of a movie by CASTING_DIRECTOR who is not authorized to that,
+         should return 403 error"""
+        res = self.client().post('/movies',
+                                 headers={'Authorization': 'Bearer ' + self.CASTING_DIRECTOR},
+                                 json=self.new_movie)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
 
     def test_get_movies(self):
         """Gets the /movies endpoint and checks valid results"""
@@ -313,17 +371,16 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
-    def test_401_if_deleted_movie_by_CASTING_DIRECTOR(self):
+    def test_403_if_deleted_movie_by_CASTING_DIRECTOR(self):
         """Test deleting of an movie by CASTING_DIRECTOR who is not authorized to that,
-         should return 401 error"""
+         should return 403 error"""
         max_id = db.session.query(func.max(Movie.id)).scalar()
         res = self.client().delete('/movies/' + str(max_id),
                                    headers={'Authorization': 'Bearer ' + self.CASTING_DIRECTOR})
         data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 401)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'resource not found')
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
 
     def test_get_movie_actors(self):
         """Test getting movie's actors"""
@@ -364,6 +421,17 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_403_if_added_actor_to_movie_by_CASTING_ASSISTANT(self):
+        """Test adding actor to movie by CASTING_DIRECTOR who is not authorized to that,
+         should return 403 error"""
+        res = self.client().post('/movies/1/actors/1',
+                                 headers={'Authorization': 'Bearer ' + self.CASTING_ASSISTANT})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['code'], 'unauthorized')
+        self.assertEqual(data['description'], 'Permission not found')
 
 
 # Make the tests conveniently executable
