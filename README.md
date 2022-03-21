@@ -23,7 +23,7 @@ Capstone app URL deployed on Heroku: https://udacity-capstone-shondy.herokuapp.c
 
 3. **PIP Dependencies** - Once you have your virtual environment setup and running, install dependencies by naviging to the `/backend` directory and running:
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 This will install all of the required packages we selected within the `requirements.txt` file.
 
@@ -47,8 +47,13 @@ From the root directory of the capstone project first ensure you are working usi
 
 Each time you open a new terminal session, run:
 
+- in Linux
 ```bash
 export FLASK_APP=capstone
+```
+- in Windows
+```bash
+set FLASK_APP=capstone
 ```
 
 To run the server, execute:

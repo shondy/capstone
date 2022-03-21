@@ -1,3 +1,0 @@
-AUTH0_DOMAIN=dev-0zjrk23w.us.auth0.com
-ALGORITHMS=RS256
-API_AUDIENCE=CapstoneUdacityAPI

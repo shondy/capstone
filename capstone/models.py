@@ -20,10 +20,27 @@ def setup_db(app):
 # https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
 
 '''
+Extend the base Model class to add common methods
+'''
+class ModelIUD(db.Model):
+    __abstract__ = True
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+'''
 Movie
 
 '''
-class Movie(db.Model):
+class Movie(ModelIUD):
     __tablename__ = 'Movie'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -37,17 +54,6 @@ class Movie(db.Model):
         self.title = title
         self.release_date = release_date
 
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
     def format(self):
         return {
             'id': self.id,
@@ -55,7 +61,7 @@ class Movie(db.Model):
             'release_date': self.release_date
         }
 
-class Actor(db.Model):
+class Actor(ModelIUD):
     __tablename__ = 'Actor'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -67,17 +73,6 @@ class Actor(db.Model):
         self.name = name
         self.age = age
         self.gender = gender
-
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
     def format(self):
         return {
