@@ -336,3 +336,65 @@ set CASTING_ASSISTANT_JWT=<JWT for casting assistant>
 set CASTING_DIRECTOR_JWT=<JWT for casting director> 
 set EXECUTIVE_PRODUCER_JWT=<JWT for executive producer>
 ```
+
+## Heroku Deployment
+1. Create an account with Heroku: https://signup.heroku.com/
+2. Download the Heroku CLI. install Heroku with Homebrew by running:
+```
+brew tap heroku/brew && brew install heroku
+``` 
+3. Install Gunicorn - Python HTTP server for WSGI applications that will be used for deploying our applications:
+```
+pip install gunicorn
+```
+4. Create Procfile:
+```
+touch Procfile
+```
+Add next line to Procfile:
+```
+web: gunicorn capstone:app
+```
+5. Create empty Heroku app:
+```
+heroku create name_of_your_app
+```
+The output will include a git url for your Heroku application. 
+
+6. Add git remote for Heroku to local repository using the git url :point_up_2::
+```
+git remote add heroku heroku_git_url.
+```
+
+7. Add postgresql add on for the database
+Heroku has an addon for apps for a postgresql database instance. 
+Run this code in order to create your database and connect it to your application: 
+```
+heroku addons:create heroku-postgresql:hobby-dev --app name_of_your_application
+```
+where
+- heroku-postgresql is the name of the addon
+    
+- hobby-dev specifies the tier of the addon, in this case the free version which has a limit on the amount of data it will store, though fairly high.
+
+To check your configuration variables in Heroku run:
+```
+heroku config --app name_of_your_application 
+```
+It will return DATABASE_URL and the URL of the database you just created.
+
+8. Add environment variables.
+
+In the browser, go to your Heroku Dashboard and access your application's settings. 
+Reveal your config variables and add environment variables: AUTH0_DOMAIN, ALGORITHMS, API_AUDIENCE
+
+9. Push the project to your heroku github repository:
+```
+git push heroku master
+```
+
+10. Run migrations
+Once your app is deployed, run migrations by running: 
+```
+heroku run python manage.py db upgrade --app name_of_your_application
+```
